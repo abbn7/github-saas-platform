@@ -15,6 +15,9 @@ const adminRoutes = require('./routes/admin');
 
 const app = express();
 
+// Trust proxy for Railway/Cloudflare
+app.set('trust proxy', 1);
+
 // Security middlewares
 app.use(helmet());
 app.use(cors());
@@ -101,6 +104,12 @@ async function startServer() {
     const redis = require('./config/redis');
     await redis.ping();
     logger.info('✅ Redis connected');
+
+    // Start Workers if not in a separate process (Optional but helpful for single-dyno setups)
+    if (process.env.START_WORKERS === 'true' || config.env === 'production') {
+      require('./worker');
+      logger.info('👷 Workers started within server process');
+    }
 
     // Set webhook for Telegram bot
     const webhookUrl = `${config.telegram.webhookDomain}/webhook`;
