@@ -2,14 +2,26 @@ const { Queue, Worker } = require('bullmq');
 const config = require('../config');
 const logger = require('../utils/logger');
 
-const connection = {
-  host: config.redis.url.includes('@') 
-    ? config.redis.url.split('@')[1].split(':')[0]
-    : 'localhost',
-  port: config.redis.url.includes('@')
-    ? parseInt(config.redis.url.split(':')[2] || '6379')
-    : 6379,
+// Improved connection parsing for Redis URL
+const parseRedisUrl = (url) => {
+  try {
+    if (!url) return { host: 'localhost', port: 6379 };
+    
+    // Use URL parser for more reliable extraction
+    const parsed = new URL(url);
+    return {
+      host: parsed.hostname || 'localhost',
+      port: parseInt(parsed.port) || 6379,
+      password: parsed.password || undefined,
+      username: parsed.username || undefined,
+    };
+  } catch (error) {
+    logger.error('Error parsing Redis URL, falling back to defaults:', error);
+    return { host: 'localhost', port: 6379 };
+  }
 };
+
+const connection = parseRedisUrl(config.redis.url);
 
 // Create queues
 const githubQueue = new Queue('github-operations', { connection });
@@ -33,7 +45,7 @@ class QueueService {
         },
         ...options,
       });
-      logger.info(`GitHub job added: ${jobName} - ${job.id}`);
+      logger.info(\`GitHub job added: \${jobName} - \${job.id}\`);
       return job;
     } catch (error) {
       logger.error('QueueService addGitHubJob error:', error);
@@ -51,7 +63,7 @@ class QueueService {
         },
         ...options,
       });
-      logger.info(`Upload job added: ${job.id}`);
+      logger.info(\`Upload job added: \${job.id}\`);
       return job;
     } catch (error) {
       logger.error('QueueService addUploadJob error:', error);
@@ -65,7 +77,7 @@ class QueueService {
         attempts: 2,
         ...options,
       });
-      logger.info(`Notification job added: ${job.id}`);
+      logger.info(\`Notification job added: \${job.id}\`);
       return job;
     } catch (error) {
       logger.error('QueueService addNotificationJob error:', error);
