@@ -45,7 +45,7 @@ class QueueService {
         },
         ...options,
       });
-      logger.info(\`GitHub job added: \${jobName} - \${job.id}\`);
+      logger.info(`GitHub job added: ${jobName} - ${job.id}`);
       return job;
     } catch (error) {
       logger.error('QueueService addGitHubJob error:', error);
@@ -63,7 +63,7 @@ class QueueService {
         },
         ...options,
       });
-      logger.info(\`Upload job added: \${job.id}\`);
+      logger.info(`Upload job added: ${job.id}`);
       return job;
     } catch (error) {
       logger.error('QueueService addUploadJob error:', error);
@@ -77,7 +77,7 @@ class QueueService {
         attempts: 2,
         ...options,
       });
-      logger.info(\`Notification job added: \${job.id}\`);
+      logger.info(`Notification job added: ${job.id}`);
       return job;
     } catch (error) {
       logger.error('QueueService addNotificationJob error:', error);
